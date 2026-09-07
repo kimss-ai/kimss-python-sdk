@@ -43,7 +43,8 @@ When the user asks you to onboard a repo to Kimss (or ג€route traffic throu
 6. **Map models** to vaulted aliases (`custom:your-model-id`). Do not leave bare `gpt-4o` / `claude-ג€¦` unless that exact string is what was vaulted.
 7. **Always send** `X-Kimss-Agent-Id` (and preferably `X-Kimss-Agent-Name`) on inference ג€” via `default_headers`, `defaultHeaders`, `extra_headers`, or middleware. Pick a stable slug per service (e.g. `billing-bot`).
 8. **Forward headers** through any HTTP interceptor / proxy / Hermis-style middleware ג€” never strip Kimss agent headers.
-9. **Verify** (see [Verification](#verification-after-wiring) below). Do not claim success until a live call works or the user confirms Vault + key + model alias.
+9. **If the user also needs internal MCP** (their HTTPS MCP servers behind Kimss): follow [Internal MCP routing](#internal-mcp-routing) and [docs/mcp-routing.md](docs/mcp-routing.md). Do **not** confuse this with optional `kimss-mcp-server` (IDE ג†’ Kimss API).
+10. **Verify** (see [Verification](#verification-after-wiring) below). Do not claim success until a live call works or the user confirms Vault + key + model alias.
 
 Optional: `pip install kimss` only if you want `kimss.gateway_headers(...)` for Agent Tracking context ג€” **not** required for inference.
 
@@ -68,7 +69,7 @@ If a model is not vaulted, Kimss returns an error pointing to Provider Vault. **
 5. **Always** inject `X-Kimss-Agent-Id` (preferably also `X-Kimss-Agent-Name`) for JIT inventory, audit, spend attribution, and kill-switch. Omitting it may still proxy, but agents appear as unattributed / model-labelled shadow rows and kill-switch by name is weaker.
 6. **Call-site visibility (recommended):** when `kimss` is installed, use `kimss.gateway_headers(agent_id=..., agent_name=...)` as `extra_headers`. A plain dict with `X-Kimss-Agent-Id` is enough.
 7. **Streaming** works the same (`stream=True` / `stream: true`) ג€” keep Kimss base URL and headers.
-8. **Control-plane API** (registry, MCP RBAC, audit, metering, kill switch): use [`openapi/control-plane.yaml`](openapi/control-plane.yaml) ג€” not chat endpoints. OpenAPI does **not** duplicate inference paths; this file is the inference contract.
+8. **Control-plane API** (registry, MCP RBAC, audit, metering, kill switch): use [`openapi/control-plane.yaml`](openapi/control-plane.yaml) ג€” not chat endpoints. OpenAPI does **not** duplicate inference paths; this file is the inference contract. MCP register/grant shapes are in that spec; step-by-step MCP: [docs/mcp-routing.md](docs/mcp-routing.md).
 9. **Hermis** is the Kimss orchestration framework (not LangGraph). The gateway applies identity, kill switch, spend policy, and audit on the routed hop.
 
 ---
@@ -191,24 +192,45 @@ Shape: [`examples/governed-requests-meter-response.json`](examples/governed-requ
 | Model not found / vault error | Model not registered as `custom:ג€¦` | Vault under `/app/vault`; match the exact model string |
 | Anthropic path errors | `base_url` includes `/v1/messages` | Use `https://api.kimss.ai` only |
 | OpenAI 404 on `/chat/completions` | Used Anthropic base without `/v1` | OpenAI must use `https://api.kimss.ai/v1` |
+| MCP register/call blocked | Guardrails Internal MCP off | Enable under `/app/guardrails`; see [docs/mcp-routing.md](docs/mcp-routing.md) |
+
+---
+
+## Internal MCP routing
+
+**Path A ג€” your MCP servers behind Kimss (governed):** register HTTPS MCP under `/api/v1/mcp-servers`, enable Guardrails **Internal MCP**, attach tools on the agent, optional grants/argument policies. Hermis calls `mcp__{server}__{tool}`. Full procedure: **[docs/mcp-routing.md](docs/mcp-routing.md)**.
+
+**Path B ג€” IDE talks to Kimss as MCP tools (optional):** `pip install 'kimss[mcp]'` / `kimss-mcp-server` ג€” see https://kimss.ai/docs/python_sdk_mcp. That does **not** replace Path A and is **not** required for gateway chat.
+
+Minimal Path A register:
+
+```bash
+curl -sS -X POST "https://api.kimss.ai/api/v1/mcp-servers" \
+  -H "Authorization: Bearer kimss_..." \
+  -H "Content-Type: application/json" \
+  -d @examples/mcp-server-register.json
+```
+
+Then discover, attach tools in the Agents UI, and optionally upsert grants (`examples/mcp-tool-grant-*.json`).
 
 ---
 
 ## What `KimssClient` is for
 
-Control-plane / DevOps only (`agents.register`, `usage.report`). Inference methods are deprecated. Prefer this file + native SDKs for chat.
+Control-plane / DevOps only (`agents.register`, `usage.report`, MCP registry helpers if used). Inference methods are deprecated. Prefer this file + native SDKs for chat.
 
 ## Kill switch
 
-HTTP **403** with `agent_disabled` (OpenAI `error.code` or Anthropic error body).
+HTTP **403** with `agent_disabled` (OpenAI `error.code` or Anthropic error body). Applies to MCP tool hops in Hermis as well.
 
 ## Control-plane quick path
 
 | Task | Endpoint | Doc |
 |------|----------|-----|
 | Check monthly cap | `GET /api/v1/governed-requests/meter` | OpenAPI |
-| Register MCP server | `POST /api/v1/mcp-servers` | [`examples/`](examples/) |
-| Grant MCP tool access | `POST /api/v1/mcp-servers/{name}/grants` | [`examples/mcp-tool-grant-*.json`](examples/) |
+| Register MCP server | `POST /api/v1/mcp-servers` | [docs/mcp-routing.md](docs/mcp-routing.md), [`examples/mcp-server-register.json`](examples/mcp-server-register.json) |
+| Discover MCP tools | `POST /api/v1/mcp-servers/{name}/discover` | [docs/mcp-routing.md](docs/mcp-routing.md) |
+| Grant MCP tool access | `PUT /api/v1/mcp-servers/{name}/grants` | [`examples/mcp-tool-grant-*.json`](examples/) |
 | Write audit event | `POST /audit_log/` | OpenAPI |
 | Kill switch | `POST /agent_set_status/` | [`examples/agent-kill-switch-disable.json`](examples/) |
 
@@ -219,6 +241,8 @@ Copy-paste scripts + local gateway simulator: [kimss-python-quickstart](https://
 ## Related
 
 - https://kimss.ai/docs/route_traffic
+- https://kimss.ai/docs/routing_internal_mcp_servers
+- [docs/mcp-routing.md](docs/mcp-routing.md)
 - [docs/anthropic-onboarding.md](docs/anthropic-onboarding.md)
 - [docs/decision-maker-brief.md](docs/decision-maker-brief.md) ג€” buyer / security overview (not required for wiring)
 - [kimss-python-sdk](https://github.com/kimss-ai/kimss-python-sdk) ג€” optional `pip install kimss`
