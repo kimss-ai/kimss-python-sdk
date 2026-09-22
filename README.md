@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
 [![CI](https://img.shields.io/badge/CI-indigo?logo=github)](https://github.com/kimss-ai/kimss-python-sdk/actions/workflows/ci.yml)
 
+> **Deprecated for new gateway onboarding.** Do not `pip install kimss` to connect an app. Keep the native OpenAI or Anthropic client and follow the [control-plane agent-to-agent contract](https://github.com/kimss-ai/kimss-control-plane/blob/main/AI_INTEGRATION.md). New Python agents: [Kimss Forge](https://github.com/kimss-ai/kimss-forge) (`pip install kimss-forge`, then `gateway="kimss"`). This package remains for existing control-plane callers and the optional IDE MCP server.
+
 **Track, govern, and secure autonomous agents with exactly 1 line of code. Zero data-plane refactoring required.**
 
 [Kimss](https://kimss.ai) is a **Model-Agnostic Enterprise AI Gateway** and **Governance Control Plane** with a **dual-listener** inbound proxy (OpenAI + Anthropic). Keep the native SDK you already use — swap the base URL, add an Agent ID header, and every call gets identity, an audit trail, and a kill switch. Kimss never hosts your models (**BYOI**).
