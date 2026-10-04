@@ -56,7 +56,7 @@ ANTHROPIC_BASE_URL="https://api.kimss.ai"
 ANTHROPIC_API_KEY="kimss_..."
 ```
 
-**Developer tier (Always Free):** 25,000 governed requests/month · [Get a key](https://kimss.ai/app/signup)
+**Start with a 14-day Production trial (no card):** 100,000 governed requests/month during the trial · [Sign up](https://kimss.ai/app/signup)
 
 | Inbound (your app → Kimss) | Vaulted BYO (Kimss → your provider) |
 |----------------------------|-------------------------------------|

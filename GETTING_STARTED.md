@@ -4,7 +4,7 @@
 
 Kimss is the **Secure AI Gateway** and **Governance Control Plane**: identity, audit, kill switch, and a provider vault. You bring the models (**BYOI**).
 
-**Developer tier (Always Free):** 25,000 governed requests/month. No credit card.
+**Start with a 14-day Production trial (no card):** 100,000 governed requests/month during the trial · [Sign up](https://kimss.ai/app/signup)
 
 ## Step 1 — Sign In & Vault
 
