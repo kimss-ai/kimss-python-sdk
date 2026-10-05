@@ -14,6 +14,11 @@ def gateway_headers(
     env: Optional[str] = None,
     region: Optional[str] = None,
     hostname: Optional[str] = None,
+    run_id: Optional[str] = None,
+    depth: Optional[int] = None,
+    parent_span: Optional[str] = None,
+    span_id: Optional[str] = None,
+    lineage: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Return ``extra_headers`` for official OpenAI/Anthropic SDK clients pointed at Kimss.
@@ -37,4 +42,14 @@ def gateway_headers(
         )
     except Exception:
         pass
+    if (run_id or "").strip():
+        headers["X-Kimss-Run-Id"] = str(run_id).strip()
+    if depth is not None:
+        headers["X-Kimss-Depth"] = str(int(depth))
+    if (parent_span or "").strip():
+        headers["X-Kimss-Parent-Span"] = str(parent_span).strip()
+    if (span_id or "").strip():
+        headers["X-Kimss-Span-Id"] = str(span_id).strip()
+    if (lineage or "").strip():
+        headers["X-Kimss-Lineage"] = str(lineage).strip()
     return headers
