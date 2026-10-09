@@ -100,7 +100,7 @@ The **`kimss`** package is an **infrastructure management** client — not an in
 | Report BYO usage | `client.usage.report(...)` → `POST /v1/usage/events` |
 | Vault endpoint + token cap | REST `POST/PATCH /api/v1/custom-model-endpoints` — [docs](https://kimss.ai/docs/custom_model_endpoints) |
 | Kill switch | Governance → Agents, or `POST /agent_set_status/` `{ "id", "status": "disabled" }` (admin) |
-| Article 12–style audit | Gateway → Recent calls; `POST /audit_log/`; APIM GatewayLogs when enabled |
+| Audit log | Administrative actions and governed requests (configurable retention); `POST /audit_log/`; optional APIM GatewayLogs when enabled |
 | MCP sync | Control Plane / Connected Infrastructure (UI registration) |
 
 ```bash
