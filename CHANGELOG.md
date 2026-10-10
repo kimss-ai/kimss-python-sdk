@@ -2,6 +2,13 @@
 
 All notable changes to the **kimss** PyPI package are documented here. The canonical source for this file in development is the monorepo path `kimss_sdk/CHANGELOG.md`.
 
+## [2.2.0] — 2026-10-10
+
+### Added
+
+- **`KimssProxy`** (`kimss.proxy`): Invisible Proxy helper that auto-mints `X-Kimss-Run-Id` / lineage for OpenAI and Anthropic SDKs (`proxy.openai()`, `proxy.anthropic()`, or `proxy.chat_completions()`). Use `proxy.delegate(agent_id=...)` for the child hop. Example: [examples/00c_proxy_auto_lineage.py](examples/00c_proxy_auto_lineage.py).
+- **`RunContext`** helpers on `kimss.run_context` / package exports for declared multi-agent runs without Kimss Forge.
+
 ## [2.1.1] — 2026-08-21
 
 ### Added

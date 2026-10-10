@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kimss"
-version = "2.1.1"
+version = "2.2.0"
 description = "Kimss Secure AI Gateway control-plane SDK (register agents, report usage; prefer OpenAI or Anthropic native SDK at the Kimss gateway for inference)"
 readme = "README.md"
 requires-python = ">=3.10"
