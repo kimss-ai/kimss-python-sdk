@@ -99,7 +99,7 @@ The **`kimss`** package is an **infrastructure management** client — not an in
 | Register external agent | `client.agents.register(...)` → `POST /v1/agents/register` |
 | Report BYO usage | `client.usage.report(...)` → `POST /v1/usage/events` |
 | Vault endpoint + token cap | REST `POST/PATCH /api/v1/custom-model-endpoints` — [docs](https://kimss.ai/docs/custom_model_endpoints) |
-| Kill switch | Governance → Agents, or `POST /agent_set_status/` `{ "id", "status": "disabled" }` (admin) |
+| Kill switch | **Agents** (`/app/agents`) — Disable / Re-enable, or `POST /agent_set_status/` `{ "id", "status": "disabled" }` (admin) |
 | Audit log | Administrative actions and governed requests (configurable retention); `POST /audit_log/`; optional APIM GatewayLogs when enabled |
 | MCP sync | Control Plane / Connected Infrastructure (UI registration) |
 

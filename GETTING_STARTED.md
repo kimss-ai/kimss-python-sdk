@@ -74,7 +74,7 @@ Azure official clients are **not** inbound drop-ins. Vault Azure (and any other 
 ## Step 4 — Monitor and kill switch
 
 - **Gateway → Recent calls** — attributed to your `X-Kimss-Agent-Id` (or JIT-discovered).
-- **Governance → Agents** — disable an agent → HTTP **403** `agent_disabled`.
+- **Agents** (`/app/agents`) — **Disable** an agent (kill switch) → HTTP **403** `agent_disabled`; **Re-enable** on the same page.
 
 ## Control plane (optional)
 
