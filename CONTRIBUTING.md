@@ -25,7 +25,7 @@ On every push to `main` that touches `kimss_sdk/**`, the workflow runs `git subt
 
 ## PyPI (trusted publisher)
 
-1. On [pypi.org](https://pypi.org), open **Your projects** → **kimss** → **Manage** → sidebar **Publishing** (`/manage/project/kimss/settings/publishing/`). Add a GitHub trusted publisher: owner `kimssai`, repository `kimss-python-sdk`, workflow filename **`publish.yml`**, environment blank.
+1. On [pypi.org](https://pypi.org), open **Your projects** → **kimss** → **Manage** → sidebar **Publishing** (`/manage/project/kimss/settings/publishing/`). Add a GitHub trusted publisher: owner **`kimss-ai`**, repository **`kimss-python-sdk`**, workflow filename **`publish.yml`**, environment **blank** (must match the mirror repo that runs the tag workflow — not the personal `kimssai` owner).
 2. In the public repo, create a **GitHub Release** from tag `v1.0.0` (or push tag `v1.0.0`) so `publish.yml` runs.
 3. Verify: `pip install -U kimss` and `uvx --from 'kimss[mcp]' kimss-mcp-server` with `KIMSS_API_KEY` set in the IDE / Claude Desktop MCP config.
 
