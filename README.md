@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
 [![CI](https://img.shields.io/badge/CI-indigo?logo=github)](https://github.com/kimss-ai/kimss-python-sdk/actions/workflows/ci.yml)
 
-> **Deprecated for new gateway onboarding.** Do not `pip install kimss` to connect an app. Keep the native OpenAI or Anthropic client and follow the [control-plane agent-to-agent contract](https://github.com/kimss-ai/kimss-control-plane/blob/main/AI_INTEGRATION.md). New Python agents: [Kimss Forge](https://github.com/kimss-ai/kimss-forge) (`pip install kimss-forge`, then `gateway="kimss"`). This package remains for existing control-plane callers and the optional IDE MCP server.
+> **Deprecated for new gateway onboarding.** New integration starts at [control-plane ONBOARDING.md](https://github.com/kimss-ai/kimss-control-plane/blob/main/ONBOARDING.md) — this package is a client, not a second getting-started path. Do not `pip install kimss` to connect an app. Keep the native OpenAI or Anthropic client and follow the [agent-to-agent contract](https://github.com/kimss-ai/kimss-control-plane/blob/main/AI_INTEGRATION.md). New Python agents: [Kimss Forge](https://github.com/kimss-ai/kimss-forge) (`pip install kimss-forge`, then `gateway="kimss"`). This package remains for existing control-plane callers, optional `KimssProxy` lineage, and the IDE MCP server.
 
 **Track, govern, and secure autonomous agents with exactly 1 line of code. Zero data-plane refactoring required.**
 

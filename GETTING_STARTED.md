@@ -24,7 +24,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url=os.getenv("KIMSS_GATEWAY_URL", "https://api.kimss.ai/v1"),
-    api_key=os.getenv("KIMSS_WORKSPACE_KEY") or os.getenv("KIMSS_API_KEY"),
+    api_key=os.getenv("KIMSS_API_KEY") or os.getenv("KIMSS_WORKSPACE_KEY"),
 )
 response = client.chat.completions.create(
     model=os.getenv("KIMSS_MODEL", "custom:your-vaulted-model"),
@@ -44,7 +44,7 @@ from anthropic import Anthropic
 
 client = Anthropic(
     base_url=os.getenv("ANTHROPIC_BASE_URL", "https://api.kimss.ai"),
-    api_key=os.getenv("KIMSS_WORKSPACE_KEY") or os.getenv("KIMSS_API_KEY"),
+    api_key=os.getenv("KIMSS_API_KEY") or os.getenv("KIMSS_WORKSPACE_KEY"),
 )
 response = client.messages.create(
     model=os.getenv("KIMSS_MODEL", "custom:your-vaulted-model"),

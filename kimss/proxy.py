@@ -57,8 +57,8 @@ class KimssProxy:
             raise ValueError("agent_id is required")
         self.api_key = (
             api_key
-            or os.environ.get("KIMSS_WORKSPACE_KEY")
             or os.environ.get("KIMSS_API_KEY")
+            or os.environ.get("KIMSS_WORKSPACE_KEY")
             or ""
         ).strip()
         self.agent_id = aid

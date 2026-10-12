@@ -2,7 +2,7 @@
 """Invisible Proxy with automatic Run-Id / lineage (setup-once, non-Forge).
 
 Env:
-  KIMSS_WORKSPACE_KEY or KIMSS_API_KEY
+  KIMSS_API_KEY or KIMSS_WORKSPACE_KEY
   KIMSS_AGENT_ID (root / orchestrator)
   KIMSS_MODEL
   KIMSS_GATEWAY_URL (optional)
@@ -18,11 +18,11 @@ from kimss.proxy import KimssProxy
 
 
 def main() -> None:
-    key = (os.environ.get("KIMSS_WORKSPACE_KEY") or os.environ.get("KIMSS_API_KEY") or "").strip()
+    key = (os.environ.get("KIMSS_API_KEY") or os.environ.get("KIMSS_WORKSPACE_KEY") or "").strip()
     agent_id = (os.environ.get("KIMSS_AGENT_ID") or "orchestrator").strip()
     model = (os.environ.get("KIMSS_MODEL") or "").strip()
     if not key or not model:
-        print("Set KIMSS_WORKSPACE_KEY (or KIMSS_API_KEY) and KIMSS_MODEL.", file=sys.stderr)
+        print("Set KIMSS_API_KEY (or KIMSS_WORKSPACE_KEY) and KIMSS_MODEL.", file=sys.stderr)
         raise SystemExit(1)
 
     proxy = KimssProxy(api_key=key, agent_id=agent_id, agent_name="Orchestrator")

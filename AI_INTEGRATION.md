@@ -2,7 +2,7 @@
 
 **Canonical public A2A contract** for Cursor, Cascade, Claude Code, Windsurf, Devin, and other coding assistants.
 
-If the user gave you **only this repo link** (or said “onboard Kimss” without a Gateway key / vaulted model), run the guided workflow in **[ONBOARDING.md](https://raw.githubusercontent.com/kimss-ai/kimss-control-plane/main/ONBOARDING.md)** first — welcome, collect key and model, then return here to wire.
+If the user gave you **only this repo link** (or said **implement / integrate / build / onboard** Kimss without a Gateway key), run the guided workflow in **[ONBOARDING.md](https://raw.githubusercontent.com/kimss-ai/kimss-control-plane/main/ONBOARDING.md)** first — collect the key, resolve the vaulted model (`GET /v1/models`), then return here to wire.
 
 **Fetch URL (always prefer this over cloning):**
 
@@ -39,22 +39,20 @@ Optional IDE MCP (`kimss-mcp-server`) is a separate extra. It is not required to
 
 ## Cascade / coding-agent procedure (follow in order)
 
-When the user asks you to onboard a repo to Kimss (or “route traffic through the Kimss gateway”):
+When the user asks you to implement / integrate / build / onboard a repo to Kimss (or “route traffic through the Kimss gateway”):
 
-1. **Confirm prerequisites** (user should already have done these in the Kimss UI). If not, stop and tell them to complete:
-   - Provider Vault (`/app/vault`) — each model they call must exist as `custom:<model_id>`
-   - Gateway API key (`/app/keys`) — a `kimss_...` workspace key (not the provider key)
-2. **Detect** whether the codebase uses OpenAI-compatible clients, Anthropic clients, or both (SDK imports, `OPENAI_*` / `ANTHROPIC_*` env, LangChain/Vercel AI `baseURL`, raw `fetch` to `api.openai.com` / `api.anthropic.com`).
-3. **Choose the client** using [What to install](#what-to-install). If an OpenAI or Anthropic client already exists, keep it for Path A. Never add `KimssClient` / `AgentsApi.run` for chat. If there is no LLM client and the user wants a new Python agent, add Kimss Forge (`pip install kimss-forge`, `gateway="kimss"`). Add `KimssProxy` (Python or Java) **only** when the user wants swarm lineage ([Swarm lineage](#swarm-lineage-optional)).
-4. **Point the client at Kimss** (skip when using Kimss Forge — `gateway="kimss"` sets the listener):
+1. **Confirm the Gateway key** (`KIMSS_API_KEY` or accepted alias). If missing, stop and point them to `/app/keys` (see ONBOARDING.md Step 1).
+2. **Resolve the vaulted model** with `GET https://api.kimss.ai/v1/models` (Bearer = Gateway key). Use the sole `custom:*` id, ask which when several, or pause at `/app/vault` when empty. Do not invent a `custom:` id.
+3. **Detect** whether the codebase uses OpenAI-compatible clients, Anthropic clients, or both (SDK imports, `OPENAI_*` / `ANTHROPIC_*` env, LangChain/Vercel AI `baseURL`, raw `fetch` to `api.openai.com` / `api.anthropic.com`).
+4. **Choose the client** using [What to install](#what-to-install). If an OpenAI or Anthropic client already exists, keep it for Path A. Never add `KimssClient` / `AgentsApi.run` for chat. If there is no LLM client and the user wants a new Python agent, add Kimss Forge (`pip install kimss-forge`, `gateway="kimss"`). Add `KimssProxy` (Python or Java) **only** when the user wants swarm lineage ([Swarm lineage](#swarm-lineage-optional)).
+5. **Point the client at Kimss** (skip when using Kimss Forge — `gateway="kimss"` sets the listener):
    - OpenAI-compatible → `base_url` / `baseURL` = `https://api.kimss.ai/v1`
    - Anthropic → `base_url` / `baseURL` = `https://api.kimss.ai` (**no** `/v1/messages` suffix — the SDK appends it)
-5. **Swap the API key** to the Gateway `kimss_...` key via env (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `KIMSS_API_KEY`). For Kimss Forge pass `workspace_key="kimss_..."` (do not put the provider key there). Never commit provider keys.
-6. **Map models** to the exact vaulted alias the user names (`custom:your-model-id` as saved in Provider Vault). Do not invent an id by prefixing `custom:` onto a model name already in the repo. A **400** that says the model is not registered means that id is not in Vault — stop and use the id shown on `/app/vault`. Do not change `base_url` to clear it.
-7. **Always send** `X-Kimss-Agent-Id` (and preferably `X-Kimss-Agent-Name`) on inference. Pick a stable slug per service (e.g. `billing-bot`). On Python, put that dict in the client constructor as `default_headers`, or pass `extra_headers` to `.create()`. **Never** pass a parameter named `headers` to `chat.completions.create()` or `messages.create()` — the SDK raises `TypeError: unexpected keyword argument 'headers'` and the request never leaves the process. Node uses `defaultHeaders` on the client. Raw HTTP uses the header itself.
-8. **Forward headers** through any HTTP interceptor / proxy / Hermis-style middleware — never strip Kimss agent headers.
+6. **Swap the API key** to the Gateway `kimss_...` key via env (`KIMSS_API_KEY` preferred; map into `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` when the native SDK reads those names). Accept `KIMSS_WORKSPACE_KEY` as the same value. For Kimss Forge pass `workspace_key="kimss_..."` (do not put the provider key there). Never commit provider keys.
+7. **Always send** `X-Kimss-Agent-Id` (and preferably `X-Kimss-Agent-Name`) on inference. Derive a stable slug per service (e.g. `billing-bot`) and continue unless the user objects. On Python, put that dict in the client constructor as `default_headers`, or pass `extra_headers` to `.create()`. **Never** pass a parameter named `headers` to `chat.completions.create()` or `messages.create()` — the SDK raises `TypeError: unexpected keyword argument 'headers'` and the request never leaves the process. Node uses `defaultHeaders` on the client. Raw HTTP uses the header itself.
+8. **Forward headers** through any HTTP interceptor / proxy / Hermis-style middleware — never strip Kimss agent headers. Optional client tags (`X-Kimss-Client`, `X-Kimss-SDK-Context`) are **not** required for Path A discovery or kill switch.
 9. **If the user also needs internal MCP** (their HTTPS MCP servers behind Kimss): follow [Internal MCP routing](#internal-mcp-routing) and [docs/mcp-routing.md](docs/mcp-routing.md). Do **not** confuse this with optional `kimss-mcp-server` (IDE → Kimss API).
-10. **Verify** (see [Verification](#verification-after-wiring) below). Do not claim success until a live call works or the user confirms Vault + key + model alias.
+10. **Verify** (see [Verification](#verification-after-wiring) below). Do not claim success until a live call works. Do not claim kill switch or agent discovery from the key alone.
 11. **If the call is blocked by policy**, follow [Guardrails](#guardrails-do-not-fix-these-by-changing-the-client). Do not change `base_url` or install a Kimss SDK to clear HTTP 451 or a tool-argument error.
 
 ---
@@ -65,7 +63,7 @@ When the user asks you to onboard a repo to Kimss (or “route traffic through t
 2. **Gateway API key** (`/app/keys`): mint a `kimss_...` workspace key.
 3. **Route traffic** in the app: base URL + Gateway key + agent headers (this file).
 
-If a model is not vaulted, Kimss returns an error pointing to Provider Vault. **Agents** (`/app/agents`) populate automatically after the first governed request that includes `X-Kimss-Agent-Id` — you do **not** need to create agents in the UI first.
+If a model is not vaulted, Kimss returns an error pointing to Provider Vault. List vaulted aliases with `GET https://api.kimss.ai/v1/models` (Bearer = Gateway key). **Agents** (`/app/agents`) populate automatically after the first governed request that includes `X-Kimss-Agent-Id` — you do **not** need to create agents in the UI first. Disabling that row is the **kill switch** (next call → **403** `agent_disabled`). A placed API key alone does not create the inventory row or arm the switch.
 
 ---
 
@@ -75,11 +73,12 @@ If a model is not vaulted, Kimss returns an error pointing to Provider Vault. **
 2. **Keep** the codebase’s native OpenAI or Anthropic SDK (or OpenAI-compatible HTTP client) — zero data-plane refactoring.
 3. **OpenAI:** `base_url` = `https://api.kimss.ai/v1`.
 4. **Anthropic:** `base_url` = `https://api.kimss.ai` only.
-5. **Always** inject `X-Kimss-Agent-Id` (preferably also `X-Kimss-Agent-Name`) for JIT inventory, audit, spend attribution, and kill-switch. Omitting it may still proxy, but agents appear as unattributed / model-labelled shadow rows and kill-switch by name is weaker.
-6. **Call-site visibility:** pass a plain dict with `X-Kimss-Agent-Id` (and `X-Kimss-Agent-Name`) as `default_headers` on the client, or as `extra_headers` on `.create()`. The argument name is not `headers`. Do not install a Kimss package just to build that dict (Path A).
-7. **Streaming** works the same (`stream=True` / `stream: true`) — keep Kimss base URL and headers.
-8. **Control-plane API** (registry, MCP RBAC, audit, metering, kill switch): use [`openapi/control-plane.yaml`](openapi/control-plane.yaml) — not chat endpoints. OpenAPI does **not** duplicate inference paths; this file is the inference contract. MCP register/grant shapes are in that spec; step-by-step MCP: [docs/mcp-routing.md](docs/mcp-routing.md).
-9. **Hermis** is the Kimss orchestration framework (not LangGraph). The gateway applies identity, kill switch, spend policy, and audit on the routed hop.
+5. **Always** inject `X-Kimss-Agent-Id` (preferably also `X-Kimss-Agent-Name`) for JIT inventory, audit, spend attribution, and kill-switch. That header is what creates the Agents row and arms the kill switch after the first governed call. Omitting it may still proxy, but agents appear as unattributed / model-labelled shadow rows and kill-switch by name is weaker.
+6. **Optional client tags** (`X-Kimss-Client`, `X-Kimss-SDK-Context`, swarm lineage headers) are **not** required for Path A chat, discovery, or kill switch. Do not require them in Path A examples.
+7. **Call-site visibility:** pass a plain dict with `X-Kimss-Agent-Id` (and `X-Kimss-Agent-Name`) as `default_headers` on the client, or as `extra_headers` on `.create()`. The argument name is not `headers`. Do not install a Kimss package just to build that dict (Path A).
+8. **Streaming** works the same (`stream=True` / `stream: true`) — keep Kimss base URL and headers.
+9. **Control-plane API** (registry, MCP RBAC, audit, metering, kill switch): use [`openapi/control-plane.yaml`](openapi/control-plane.yaml) — not chat endpoints. OpenAPI does **not** duplicate inference paths; this file is the inference contract. MCP register/grant shapes are in that spec; step-by-step MCP: [docs/mcp-routing.md](docs/mcp-routing.md).
+10. **Hermis** is the Kimss orchestration framework (not LangGraph). The gateway applies identity, kill switch, spend policy, and audit on the routed hop.
 
 ---
 
@@ -93,6 +92,9 @@ OPENAI_API_KEY="kimss_your_gateway_key"
 # Anthropic clients
 ANTHROPIC_BASE_URL="https://api.kimss.ai"
 ANTHROPIC_API_KEY="kimss_your_gateway_key"
+
+# Canonical Gateway key (alias: KIMSS_WORKSPACE_KEY — same value)
+KIMSS_API_KEY="kimss_your_gateway_key"
 
 # Recommended for header injection in app config
 KIMSS_AGENT_ID="my-service"

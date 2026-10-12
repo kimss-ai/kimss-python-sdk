@@ -8,7 +8,7 @@ Pair with [AI_INTEGRATION.md](../AI_INTEGRATION.md), [README.md](../README.md), 
 1. **Python ≥ 3.10** available.
 2. For **inference**: keep the native SDK already in the repo — `pip install openai` and/or `pip install anthropic`. Point it at the Kimss gateway (no Kimss SDK required).
 3. Optional control-plane package: `pip install kimss` (register agents, report usage). Declared dep: `requests>=2.28`.
-4. Set env: `KIMSS_WORKSPACE_KEY` or `KIMSS_API_KEY`, `KIMSS_AGENT_ID`. OpenAI default host `https://api.kimss.ai/v1`. Anthropic default host `https://api.kimss.ai`.
+4. Set env: `KIMSS_API_KEY` (alias `KIMSS_WORKSPACE_KEY`), `KIMSS_AGENT_ID`. OpenAI default host `https://api.kimss.ai/v1`. Anthropic default host `https://api.kimss.ai`.
 5. **Preferred first call:** official OpenAI client → `POST /v1/chat/completions` **or** official Anthropic client → `POST /v1/messages`, always with `X-Kimss-Agent-Id`.
 6. **Agents Discovery:** inventory rows appear JIT after first gateway traffic. Endpoint governance (monthly token caps, Article 12 assurance) lives in Provider Vault — not as agent checkboxes.
 7. **Deprecated:** `KimssClient.agents.run`, `chat`, `Agent.query`, `models.create`, MCP `kimss_chat` / `kimss_run_agent` / `kimss_complete`.
@@ -23,7 +23,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url=os.getenv("KIMSS_GATEWAY_URL", "https://api.kimss.ai/v1"),
-    api_key=os.getenv("KIMSS_WORKSPACE_KEY") or os.getenv("KIMSS_API_KEY"),
+    api_key=os.getenv("KIMSS_API_KEY") or os.getenv("KIMSS_WORKSPACE_KEY"),
 )
 resp = client.chat.completions.create(
     model=os.getenv("KIMSS_MODEL", "custom:your-vaulted-model"),
@@ -43,7 +43,7 @@ from anthropic import Anthropic
 
 client = Anthropic(
     base_url=os.getenv("ANTHROPIC_BASE_URL", "https://api.kimss.ai"),
-    api_key=os.getenv("KIMSS_WORKSPACE_KEY") or os.getenv("KIMSS_API_KEY"),
+    api_key=os.getenv("KIMSS_API_KEY") or os.getenv("KIMSS_WORKSPACE_KEY"),
 )
 resp = client.messages.create(
     model=os.getenv("KIMSS_MODEL", "custom:your-vaulted-model"),

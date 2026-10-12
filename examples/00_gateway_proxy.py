@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Canonical Kimss gateway proxy — official OpenAI client + Agent-Id headers.
+"""Canonical Kimss gateway proxy — official OpenAI client + X-Kimss-Agent-Id headers.
 
 Env:
-  KIMSS_WORKSPACE_KEY or KIMSS_API_KEY (required)
+  KIMSS_API_KEY or KIMSS_WORKSPACE_KEY (required)
   KIMSS_AGENT_ID (required for attribution / kill switch)
   KIMSS_MODEL (required — vaulted logical id, e.g. custom:...)
   KIMSS_GATEWAY_URL (optional, default https://api.kimss.ai/v1)
@@ -19,12 +19,12 @@ from kimss.gateway_headers import gateway_headers
 
 
 def main() -> None:
-    key = (os.environ.get("KIMSS_WORKSPACE_KEY") or os.environ.get("KIMSS_API_KEY") or "").strip()
+    key = (os.environ.get("KIMSS_API_KEY") or os.environ.get("KIMSS_WORKSPACE_KEY") or "").strip()
     agent_id = (os.environ.get("KIMSS_AGENT_ID") or "").strip()
     model = (os.environ.get("KIMSS_MODEL") or "").strip()
     if not key or not agent_id or not model:
         print(
-            "Set KIMSS_WORKSPACE_KEY (or KIMSS_API_KEY), KIMSS_AGENT_ID, and KIMSS_MODEL.",
+            "Set KIMSS_API_KEY (or KIMSS_WORKSPACE_KEY), KIMSS_AGENT_ID, and KIMSS_MODEL.",
             file=sys.stderr,
         )
         raise SystemExit(1)
